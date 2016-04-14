@@ -413,6 +413,11 @@ def add_bridge_port(name, port, promisc=False, port_type=None):
         cmd += ['--', 'set', 'Interface', port,
                 'type={}'.format(port_type)]
     subprocess.check_call(cmd)
+    subprocess.check_call(["ip", "link", "set", port, "up"])
+    if promisc:
+        subprocess.check_call(["ip", "link", "set", port, "promisc", "on"])
+    else:
+        subprocess.check_call(["ip", "link", "set", port, "promisc", "off"])
 
 
 def enable_nova_metadata():
