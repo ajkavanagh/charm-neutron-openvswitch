@@ -24,7 +24,7 @@ from charmhelpers.contrib.openstack.utils import (
 import neutron_ovs_context
 from charmhelpers.contrib.network.ovs import (
     add_bridge,
-    # add_bridge_port,
+    add_bridge_port,
     full_restart,
 )
 from charmhelpers.core.hookenv import (
@@ -364,8 +364,8 @@ def configure_ovs():
         device_index = 0
         for br in dpdk_bridgemaps.itervalues():
             add_bridge(br, datapath_type)
-            add_bridge_port(br, 'dpdk{}'.format(device_index),
-                            port_type='dpdk')
+            dpdk_add_bridge_port(br, 'dpdk{}'.format(device_index),
+                                 port_type='dpdk')
             device_index += 1
 
     # Ensure this runs so that mtu is applied to data-port interfaces if
@@ -405,7 +405,7 @@ def use_dpdk():
 
 
 # TODO: update into charm-helpers to add port_type parameter
-def add_bridge_port(name, port, promisc=False, port_type=None):
+def dpdk_add_bridge_port(name, port, promisc=False, port_type=None):
     ''' Add a port to the named openvswitch bridge '''
     # log('Adding port {} to bridge {}'.format(port, name))
     cmd = ["ovs-vsctl", "--", "--may-exist", "add-port", name, port]
@@ -413,6 +413,11 @@ def add_bridge_port(name, port, promisc=False, port_type=None):
         cmd += ['--', 'set', 'Interface', port,
                 'type={}'.format(port_type)]
     subprocess.check_call(cmd)
+    subprocess.check_call(["ip", "link", "set", port, "up"])
+    if promisc:
+        subprocess.check_call(["ip", "link", "set", port, "promisc", "on"])
+    else:
+        subprocess.check_call(["ip", "link", "set", port, "promisc", "off"])
 
 
 def enable_nova_metadata():

@@ -17,6 +17,7 @@ import charmhelpers.core.hookenv as hookenv
 TO_PATCH = [
     'add_bridge',
     'add_bridge_port',
+    'dpdk_add_bridge_port',
     'apt_install',
     'apt_update',
     'config',
@@ -360,7 +361,7 @@ class TestNeutronOVSUtils(CharmTestCase):
             call('br-phynet2', 'netdev'),
             call('br-phynet3', 'netdev'),
         ])
-        self.add_bridge_port.assert_has_calls([
+        self.dpdk_add_bridge_port.assert_has_calls([
             call('br-phynet1', 'dpdk0', port_type='dpdk'),
             call('br-phynet2', 'dpdk1', port_type='dpdk'),
             call('br-phynet3', 'dpdk2', port_type='dpdk'),
